@@ -1,0 +1,21 @@
+
+> todo-app@0.1.0 dev
+> next dev
+
+
+   We detected TypeScript in your project and reconfigured your tsconfig.json file for you. Strict-mode is set to false by default.
+   The following suggested values were added to your tsconfig.json. These values can be changed to fit your project's needs:
+
+   	- include was updated to add '.next/types/**/*.ts'
+   	- plugins was updated to add { name: 'next' }
+
+  ▲ Next.js 13.5.11
+  - Local:        http://localhost:3000
+
+ ✓ Ready in 1421ms
+
+warn - No utility classes were detected in your source files. If this is unexpected, double-check the `content` option in your Tailwind CSS configuration.
+warn - https://tailwindcss.com/docs/content-configuration
+ ✓ Compiled /page in 744ms (407 modules)
+ ✓ Compiled in 70ms (213 modules)
+[?25h

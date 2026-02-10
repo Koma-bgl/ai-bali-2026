@@ -122,77 +122,69 @@ export default function TodoButton() {
                 setError('');
             }
         }
-    }, [todoText, isInputVisible]);
+    }, [ todoText, isInputVisible ]);
+
 
   return (
-    <div className="todo-container max-w-md mx-auto p-4">
+    <div>
       {!isInputVisible ? (
         <button
           ref={buttonRef}
           onClick={handleButtonClick}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
           aria-label="Add Todo"
           data-testid="add-todo-button"
-          className="add-todo-button bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white font-bold py-3 px-6 rounded-md shadow-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75"
         >
           + Add Todo
         </button>
       ) : (
-        <div className="add-todo-form">
+        <div className="flex items-center">
           <input
             type="text"
             ref={inputRef}
-            data-testid="add-todo-input"
             value={todoText}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             placeholder="Enter todo item"
-            aria-label="Todo item text"
-            className="w-full p-3 mb-2 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mr-2"
+            data-testid="add-todo-input"
           />
-          {error && <p className="text-red-500">{error}</p>}
-          <div className="flex justify-end space-x-2">
-            <button
-              data-testid="submit-todo-button"
-              onClick={handleAddTodo}
-              className="bg-green-500 hover:bg-green-600 active:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75"
-              disabled={isSubmitting || todoText.trim() === ''}
-            >
-              {isSubmitting ? 'Adding...' : 'Add'}
-            </button>
-            <button
-              data-testid="cancel-todo-button"
-              onClick={handleCancel}
-              className="bg-gray-300 hover:bg-gray-400 active:bg-gray-500 text-gray-700 font-bold py-2 px-4 rounded-md shadow-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75"
-            >
-              Cancel
-            </button>
-          </div>
+          <button
+            onClick={handleAddTodo}
+            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2"
+            data-testid="add-todo-submit"
+          >
+            Submit
+          </button>
+          <button
+            onClick={handleCancel}
+            className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            data-testid="add-todo-cancel"
+          >
+            Cancel
+          </button>
         </div>
       )}
+      {error && <p className="text-red-500 text-xs italic">{error}</p>}
 
-      {todos.length > 0 && (
-        <ul data-testid="todo-list" className="todo-list mt-4 space-y-2">
-          {todos.map(todo => (
-            <li
-              key={todo.id}
-              data-testid="todo-item"
-              className="flex items-center justify-between p-3 bg-gray-50 rounded shadow-sm"
-            >
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={todo.completed}
-                  onChange={() => toggleTodo(todo.id)}
-                  className="mr-2 h-5 w-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                />
-                <span className={todo.completed ? 'line-through text-gray-500' : 'text-gray-700'}>
-                  {todo.text}
-                </span>
-              </label>
-            </li>
-          ))}
-        </ul>
-      )}
+      {/* Display Todos */}
+      <ul data-testid="todo-list">
+        {todos.map(todo => (
+          <li key={todo.id} className="flex items-center py-2 border-b border-gray-200">
+            <input
+              type="checkbox"
+              id={`todo-${todo.id}`}
+              checked={todo.completed}
+              onChange={() => toggleTodo(todo.id)}
+              className="mr-2 h-4 w-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+              data-testid={`todo-checkbox-${todo.id}`}
+            />
+            <label htmlFor={`todo-${todo.id}`} className={`block ml-2 text-sm font-medium text-gray-900 dark:text-gray-300 ${todo.completed ? 'line-through text-gray-500' : ''}`}>
+              {todo.text}
+            </label>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

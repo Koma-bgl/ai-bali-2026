@@ -22,6 +22,8 @@ export default function Home() {
             <TodoButton />
           </div>
           
+          {/* Todo List goes here */}
+
           <div className="mt-8 pt-6 border-t border-gray-200">
             <h3 className="text-lg font-semibold text-gray-800 mb-3">How to use:</h3>
             <ul className="space-y-2 text-gray-600">

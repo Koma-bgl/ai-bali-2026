@@ -1,3 +1,4 @@
+// app/components/TodoButton.tsx
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
@@ -13,7 +14,7 @@ export default function TodoButton() {
   const [todoText, setTodoText] = useState('');
   const [error, setError] = useState('');
   const [todos, setTodos] = useState<TodoItem[]>([]);
-  const [isSubmitting, setIsSubmitting = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const inputRef = useRef<HTMLInputElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -127,60 +128,40 @@ export default function TodoButton() {
           + Add Todo
         </button>
       ) : (
-        <div className="flex">
-          <input
-            type="text"
-            ref={inputRef}
-            value={todoText}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
-            placeholder="Enter todo item"
-            className="shadow appearance-none border rounded py-2 px-3 mr-2 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            aria-label="Todo item text"
-            data-testid="add-todo-input"
-          />
-          <button
-            onClick={handleAddTodo}
-            className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-            data-testid="add-todo-submit"
-            disabled={isSubmitting || todoText.trim() === ''}
-          >
-            {isSubmitting ? 'Adding...' : 'Add'}
-          </button>
-          <button
-            onClick={handleCancel}
-            className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-            data-testid="add-todo-cancel"
-          >
-            Cancel
-          </button>
+        <div className="flex flex-col">
+          <div className="mb-2">
+            <input
+              ref={inputRef}
+              type="text"
+              id="add-todo-input"
+              placeholder="Enter todo item"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              value={todoText}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              data-testid="add-todo-input"
+            />
+            {error && <p className="text-red-500 text-xs italic" data-testid="todo-error-message">{error}</p>}
+          </div>
+          <div className="flex justify-end">
+            <button
+              onClick={handleAddTodo}
+              className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2"
+              disabled={isSubmitting || todoText.trim().length === 0}
+              data-testid="submit-todo-button"
+            >
+              Submit
+            </button>
+            <button
+              onClick={handleCancel}
+              className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              data-testid="cancel-todo-button"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       )}
-      {error && <p className="text-red-500">{error}</p>}
-
-      {/* Display Todos */}
-      {todos.length > 0 && (
-          <div className="mt-4">
-            <h3 className="text-lg font-semibold text-gray-800 mb-3">Todos:</h3>
-            <ul>
-              {todos.map(todo => (
-                <li key={todo.id} className="flex items-center py-2 border-b border-gray-200">
-                  <input
-                    type="checkbox"
-                    id={`todo-${todo.id}`}
-                    className="mr-2"
-                    checked={todo.completed}
-                    onChange={() => toggleTodo(todo.id)}
-                    aria-label={`Mark todo "${todo.text}" as ${todo.completed ? 'incomplete' : 'complete'}`}
-                  />
-                  <label htmlFor={`todo-${todo.id}`} className={`text-gray-700 ${todo.completed ? 'line-through' : ''}`}>
-                    {todo.text}
-                  </label>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
     </div>
   );
 }

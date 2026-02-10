@@ -2,10 +2,22 @@
 > todo-app@0.1.0 dev
 > next dev
 
-  ▲ Next.js 13.5.11
-  - Local:        http://localhost:9003
-
- ✓ Ready in 1413ms
- ✓ Compiled /page in 767ms (407 modules)
- ✓ Compiled in 67ms (213 modules)
+ ⨯ Failed to start server
+Error: listen EADDRINUSE: address already in use :::9002
+    at Server.setupListenHandle [as _listen2] (node:net:1904:16)
+    at listenInCluster (node:net:1961:12)
+    at Server.listen (node:net:2063:7)
+    at /Users/komayip/Documents/git/ai-bali-2026/worktrees/AIT-2/node_modules/next/dist/server/lib/start-server.js:254:16
+    at new Promise (<anonymous>)
+    at startServer (/Users/komayip/Documents/git/ai-bali-2026/worktrees/AIT-2/node_modules/next/dist/server/lib/start-server.js:191:11)
+    at process.<anonymous> (/Users/komayip/Documents/git/ai-bali-2026/worktrees/AIT-2/node_modules/next/dist/server/lib/start-server.js:277:19)
+    at process.emit (node:events:519:28)
+    at emit (node:internal/child_process:951:14)
+    at process.processTicksAndRejections (node:internal/process/task_queues:83:21) {
+  code: 'EADDRINUSE',
+  errno: -48,
+  syscall: 'listen',
+  address: '::',
+  port: 9002
+}
 [?25h

@@ -213,7 +213,7 @@ export default function TodoButton() {
                   type="checkbox"
                   checked={todo.completed}
                   onChange={() => toggleTodo(todo.id)}
-                  aria-label={`Mark "${todo.text}" as ${todo.completed ? 'incomplete' : 'complete'}`}
+                  aria-label={`Mark \"${todo.text}\" as ${todo.completed ? 'incomplete' : 'complete'}`}
                   className="h-5 w-5 mt-1 text-blue-600 rounded focus:ring-blue-500 focus:ring-offset-2"
                   data-testid={`todo-checkbox-${todo.id}`}
                   id={`todo-checkbox-${todo.id}`}

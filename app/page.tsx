@@ -41,6 +41,14 @@ export default function Home() {
                 <span className="text-green-500 mr-2">✓</span>
                 <span>Cancel anytime by clicking the <strong>"Cancel"</strong> button</span>
               </li>
+              <li className="flex items-start">
+                <span className="text-green-500 mr-2">✓</span>
+                <span>Use <strong>Escape</strong> key to cancel without clicking the Cancel button</span>
+              </li>
+              <li className="flex items-start">
+                <span className="text-green-500 mr-2">✓</span>
+                <span>Navigate with keyboard: <strong>Tab</strong> to button, <strong>Space/Enter</strong> to activate</span>
+              </li>
             </ul>
           </div>
         </div>

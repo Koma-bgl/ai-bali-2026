@@ -27,11 +27,11 @@ export default function Home() {
             <ul className="space-y-2 text-gray-600">
               <li className="flex items-start">
                 <span className="text-green-500 mr-2">✓</span>
-                <span>Click <strong>"+ Add Todo"</strong> to create a new todo</span>
+                <span>Click <strong>&quot;+ Add Todo&quot;</strong> to create a new todo</span>
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 mr-2">✓</span>
-                <span>Type your todo text and press <strong>Enter</strong> or click <strong>"Submit"</strong></span>
+                <span>Type your todo text and press <strong>Enter</strong> or click <strong>&quot;Submit&quot;</strong></span>
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 mr-2">✓</span>
@@ -39,7 +39,7 @@ export default function Home() {
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 mr-2">✓</span>
-                <span>Cancel anytime by clicking the <strong>"Cancel"</strong> button</span>
+                <span>Cancel anytime by clicking the <strong>&quot;Cancel&quot;</strong> button</span>
               </li>
               <li className="flex items-start">
                 <span className="text-green-500 mr-2">✓</span>
@@ -55,3 +55,4 @@ export default function Home() {
       </div>
     </main>
   );
+}

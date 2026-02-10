@@ -5,60 +5,7 @@
   ▲ Next.js 13.5.11
   - Local:        http://localhost:9002
 
- ✓ Ready in 1889ms
-
-warn - No utility classes were detected in your source files. If this is unexpected, double-check the `content` option in your Tailwind CSS configuration.
-warn - https://tailwindcss.com/docs/content-configuration
- ⨯ ./app/components/TodoButton.tsx
-ReactServerComponentsError:
-
-You're importing a component that needs useState. It only works in a Client Component but none of its parents are marked with "use client", so they're Server Components by default.
-Learn more: https://nextjs.org/docs/getting-started/react-essentials
-
-   ,-[[36;1;4m/Users/komayip/Documents/git/ai-bali-2026/worktrees/AIT-4/app/components/TodoButton.tsx[0m:1:1]
- [2m1[0m | import { useState } from 'react';
-   : [31;1m         ^^^^^^^^[0m
- [2m2[0m | 
- [2m3[0m | export default function TodoButton() {
- [2m4[0m |   const [isInputVisible, setIsInputVisible] = useState(false);
-   `----
-
-Maybe one of these should be marked as a client entry with "use client":
-  ./app/components/TodoButton.tsx
-  ./app/page.tsx
- ⨯ ./app/components/TodoButton.tsx
-ReactServerComponentsError:
-
-You're importing a component that needs useState. It only works in a Client Component but none of its parents are marked with "use client", so they're Server Components by default.
-Learn more: https://nextjs.org/docs/getting-started/react-essentials
-
-   ,-[[36;1;4m/Users/komayip/Documents/git/ai-bali-2026/worktrees/AIT-4/app/components/TodoButton.tsx[0m:1:1]
- [2m1[0m | import { useState } from 'react';
-   : [31;1m         ^^^^^^^^[0m
- [2m2[0m | 
- [2m3[0m | export default function TodoButton() {
- [2m4[0m |   const [isInputVisible, setIsInputVisible] = useState(false);
-   `----
-
-Maybe one of these should be marked as a client entry with "use client":
-  ./app/components/TodoButton.tsx
-  ./app/page.tsx
- ⨯ ./app/components/TodoButton.tsx
-ReactServerComponentsError:
-
-You're importing a component that needs useState. It only works in a Client Component but none of its parents are marked with "use client", so they're Server Components by default.
-Learn more: https://nextjs.org/docs/getting-started/react-essentials
-
-   ,-[[36;1;4m/Users/komayip/Documents/git/ai-bali-2026/worktrees/AIT-4/app/components/TodoButton.tsx[0m:1:1]
- [2m1[0m | import { useState } from 'react';
-   : [31;1m         ^^^^^^^^[0m
- [2m2[0m | 
- [2m3[0m | export default function TodoButton() {
- [2m4[0m |   const [isInputVisible, setIsInputVisible] = useState(false);
-   `----
-
-Maybe one of these should be marked as a client entry with "use client":
-  ./app/components/TodoButton.tsx
-  ./app/page.tsx
- ○ Compiling /_error ...
+ ✓ Ready in 1105ms
+ ✓ Compiled /page in 976ms (414 modules)
+ ✓ Compiled in 92ms (217 modules)
 [?25h

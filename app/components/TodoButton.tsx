@@ -59,7 +59,11 @@ export default function TodoButton() {
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleAddTodo();
+        if (todoText.trim() !== '') {
+            handleAddTodo();
+        } else {
+            setError('Todo item cannot be empty');
+        }
     }
     if (e.key === 'Escape') {
       setIsInputVisible(false);
@@ -110,6 +114,16 @@ export default function TodoButton() {
     }
   };
 
+    useEffect(() => {
+        if (isInputVisible) {
+            if (todoText.trim() === '') {
+                setError('Todo item cannot be empty');
+            } else {
+                setError('');
+            }
+        }
+    }, [todoText, isInputVisible]);
+
   return (
     <div className="todo-container max-w-md mx-auto p-4">
       {!isInputVisible ? (
@@ -117,36 +131,38 @@ export default function TodoButton() {
           ref={buttonRef}
           onClick={handleButtonClick}
           aria-label="Add Todo"
-          className="add-todo-button bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white font-bold py-3 px-6 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 transition-colors duration-200 data-testid=\"add-todo-button\""
+          data-testid="add-todo-button"
+          className="add-todo-button bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white font-bold py-3 px-6 rounded-md shadow-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75"
         >
           + Add Todo
         </button>
       ) : (
-        <div className="input-form flex flex-col">
-          <div className="relative">
-            <input
-              type="text"
-              ref={inputRef}
-              className="todo-input shadow appearance-none border rounded w-full py-3 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-2 data-testid=\"add-todo-input\""
-              placeholder="Enter todo item"
-              value={todoText}
-              onChange={handleInputChange}
-              onKeyDown={handleKeyDown}
-              aria-label="Todo item text"
-            />
-            {error && <p className="text-red-500 text-xs italic absolute -bottom-5">{error}</p>}
-          </div>
-          <div className="button-group flex justify-end">
+        <div className="add-todo-form">
+          <input
+            type="text"
+            ref={inputRef}
+            data-testid="add-todo-input"
+            value={todoText}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
+            placeholder="Enter todo item"
+            aria-label="Todo item text"
+            className="w-full p-3 mb-2 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          {error && <p className="text-red-500">{error}</p>}
+          <div className="flex justify-end space-x-2">
             <button
-              className="submit-button bg-green-500 hover:bg-green-700 active:bg-green-900 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2 transition-colors duration-200"
+              data-testid="submit-todo-button"
               onClick={handleAddTodo}
-              disabled={isSubmitting}
+              className="bg-green-500 hover:bg-green-600 active:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-opacity-75"
+              disabled={isSubmitting || todoText.trim() === ''}
             >
-              {isSubmitting ? 'Adding...' : 'Submit'}
+              {isSubmitting ? 'Adding...' : 'Add'}
             </button>
             <button
-              className="cancel-button bg-gray-300 hover:bg-gray-400 active:bg-gray-500 text-gray-700 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition-colors duration-200"
+              data-testid="cancel-todo-button"
               onClick={handleCancel}
+              className="bg-gray-300 hover:bg-gray-400 active:bg-gray-500 text-gray-700 font-bold py-2 px-4 rounded-md shadow-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-75"
             >
               Cancel
             </button>
@@ -155,15 +171,19 @@ export default function TodoButton() {
       )}
 
       {todos.length > 0 && (
-        <ul className="todo-list mt-4 data-testid=\"todo-list\"">
+        <ul data-testid="todo-list" className="todo-list mt-4 space-y-2">
           {todos.map(todo => (
-            <li key={todo.id} className="todo-item flex items-center justify-between py-2 px-4 border-b border-gray-200">
+            <li
+              key={todo.id}
+              data-testid="todo-item"
+              className="flex items-center justify-between p-3 bg-gray-50 rounded shadow-sm"
+            >
               <label className="flex items-center">
                 <input
                   type="checkbox"
-                  className="mr-2 leading-tight"
                   checked={todo.completed}
                   onChange={() => toggleTodo(todo.id)}
+                  className="mr-2 h-5 w-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
                 />
                 <span className={todo.completed ? 'line-through text-gray-500' : 'text-gray-700'}>
                   {todo.text}

@@ -1,28 +1,19 @@
-import { defineCatalog, ZodActions, ZodComponent, ZodProps } from '@json-render/react';
+import { defineCatalog } from '@json-render/core';
 import { z } from 'zod';
 
-export type Catalog = {
-  components: {
-    Text: ZodComponent<{
-      content: z.ZodString;
-    }>;
-  };
-  actions: {
-    setState: ZodActions<any>;
-  };
-};
+const TextSchema = z.object({ content: z.string() });
 
-export const catalog = defineCatalog<Catalog>({
+export const catalog = defineCatalog({
   components: {
     Text: {
-      schema: z.object({ content: z.string() }),
-      actions: {
-        setState: () => {},
-      },
+      schema: TextSchema,
     },
   },
   actions: {
-    setState: () => {},
+    setState: z.function(
+      z.tuple([z.string(), z.any()]),
+      z.void()
+    ),
   },
 });
 

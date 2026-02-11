@@ -1,6 +1,6 @@
 import type { BetCardProps } from "./schema";
 
-const sportEmojiMap: Record<string, string> = {
+const SPORT_EMOJI_MAP: Record<string, string> = {
   football: "⚽",
   soccer: "⚽",
   basketball: "🏀",
@@ -9,12 +9,24 @@ const sportEmojiMap: Record<string, string> = {
   baseball: "⚾",
 };
 
-function getSportEmoji(sport: string): string {
-  return sportEmojiMap[sport.toLowerCase()] ?? "🎯";
+export function getSportEmoji(sport: string): string {
+  return SPORT_EMOJI_MAP[sport.toLowerCase()] ?? "🎯";
 }
 
-function formatCurrency(amount: number): string {
+export function formatCurrency(amount: number): string {
   return `$${Math.abs(amount).toFixed(2)}`;
+}
+
+export function formatDate(isoString: string): string {
+  const date = new Date(isoString);
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "UTC",
+  });
 }
 
 export default function BetCard({ props }: { props: BetCardProps }) {
@@ -49,9 +61,6 @@ export default function BetCard({ props }: { props: BetCardProps }) {
         ? "border-red-200"
         : "border-amber-200";
 
-  const typeBadgeClass =
-    "inline-block rounded-full px-2 py-0.5 text-xs font-medium uppercase tracking-wide bg-gray-200 text-gray-700";
-
   return (
     <div
       className={`rounded-lg border ${resultBorderClass} bg-white p-4 shadow-sm`}
@@ -68,14 +77,17 @@ export default function BetCard({ props }: { props: BetCardProps }) {
             <p className="text-xs text-gray-500">{league}</p>
           </div>
         </div>
-        <span className={typeBadgeClass}>{type}</span>
+        <span className="inline-block rounded-full bg-gray-200 px-2 py-0.5 text-xs font-medium uppercase tracking-wide text-gray-700">
+          {type}
+        </span>
       </div>
 
       {/* Selection + Odds */}
       <div className="mb-3 rounded-md bg-gray-50 px-3 py-2">
         <p className="text-sm font-medium text-gray-800">{selection}</p>
         <p className="text-xs text-gray-500">
-          Odds: <span className="font-semibold text-gray-700">{odds.toFixed(2)}</span>
+          Odds:{" "}
+          <span className="font-semibold text-gray-700">{odds.toFixed(2)}</span>
         </p>
       </div>
 
@@ -97,7 +109,9 @@ export default function BetCard({ props }: { props: BetCardProps }) {
             <p
               className={`font-semibold ${profit >= 0 ? "text-green-600" : "text-red-600"}`}
             >
-              {profit >= 0 ? `+${formatCurrency(profit)}` : `-${formatCurrency(profit)}`}
+              {profit >= 0
+                ? `+${formatCurrency(profit)}`
+                : `-${formatCurrency(profit)}`}
             </p>
           ) : (
             <p className="font-semibold text-gray-400">Pending</p>
@@ -106,17 +120,15 @@ export default function BetCard({ props }: { props: BetCardProps }) {
       </div>
 
       {/* Result badge + timestamps */}
-      <div className="flex items-center justify-between border-t border-gray-100 pt-3">
+      <div className="flex items-center justify-between">
         <span
-          className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${resultColorClass}`}
+          className={`inline-block rounded-full px-2 py-0.5 text-xs font-semibold uppercase ${resultColorClass}`}
         >
           {result}
         </span>
         <div className="text-right text-xs text-gray-400">
-          <p>Placed: {new Date(placedAt).toLocaleDateString()}</p>
-          {isSettled && settledAt && (
-            <p>Settled: {new Date(settledAt).toLocaleDateString()}</p>
-          )}
+          <p>Placed: {formatDate(placedAt)}</p>
+          {isSettled && settledAt && <p>Settled: {formatDate(settledAt)}</p>}
         </div>
       </div>
     </div>

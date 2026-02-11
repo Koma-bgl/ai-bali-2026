@@ -1,11 +1,11 @@
 import React from 'react';
-import { defineRegistry } from '@json-render/react';
-import { Catalog } from './catalog';
+import { catalog } from '@/catalog';
+import { defineRegistry } from "@json-render/react";
 
-const registry = defineRegistry<Catalog>({
-  Text: ({ content }) => {
-    return React.createElement('div', null, content);
-  },
+const Text = ({ content }: { content: string }) => {
+  return <div>{content}</div>;
+};
+
+export const registry = defineRegistry(catalog, {
+    Text,
 });
-
-export default registry;

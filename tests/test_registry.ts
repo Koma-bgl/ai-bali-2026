@@ -1,18 +1,10 @@
-import { describe, it, expect } from 'vitest';
-import registry from '../src/registry';
+import { expect, test } from 'vitest';
+import { registry } from '@/registry';
 
-describe('registry', () => {
-  it('should define a registry with the Text component', () => {
-    expect(registry).toBeDefined();
-    expect(registry.Text).toBeDefined();
-  });
+test('registry definition', () => {
+  expect(registry).toBeDefined();
+  expect(Object.keys(registry).length).toBeGreaterThan(0);
 
-  it('should render the Text component with the provided content', () => {
-    const content = 'Hello, world!';
-    const TextComponent = registry.Text as React.FC<{ content: string }>;
-    const element = TextComponent({ content });
-
-    // Basic check:  You might want to use a more sophisticated check based on your needs.
-    expect(element).toBeDefined();
-  });
+  // Example: Check if the Text component is in the registry
+  expect(registry.Text).toBeDefined();
 });

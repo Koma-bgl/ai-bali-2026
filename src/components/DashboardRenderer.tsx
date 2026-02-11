@@ -1,9 +1,10 @@
 import React from 'react';
 import { Renderer } from '@json-render/react';
-import registry from '../src/registry';
+import { registry } from '@/registry';
+import { CatalogType } from '@/catalog';
 
 interface DashboardRendererProps {
-  spec: any;
+  spec: React.ComponentProps<typeof Renderer<CatalogType>>['spec'];
 }
 
 const DashboardRenderer: React.FC<DashboardRendererProps> = ({ spec }) => {

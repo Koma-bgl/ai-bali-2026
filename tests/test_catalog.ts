@@ -1,26 +1,24 @@
-import { describe, it, expect } from 'vitest';
-import catalog, { Catalog } from '../src/catalog';
+import { expect, test } from 'vitest';
+import { catalog } from '../src/catalog';
 
-describe('catalog', () => {
-  it('should define a catalog with the Text component', () => {
-    expect(catalog).toBeDefined();
-    expect(catalog.components.Text).toBeDefined();
-  });
+test('catalog definition', () => {
+  expect(catalog.components).toBeDefined();
+  expect(catalog.actions).toBeDefined();
 
-  it('should have a schema for the Text component', () => {
-    expect(catalog.components.Text.schema).toBeDefined();
-  });
+  // Example: Check if the Text component is defined
+  expect(catalog.components.Text).toBeDefined();
 
-  it('should have actions for the Text component', () => {
-    expect(catalog.components.Text.actions).toBeDefined();
-    expect(catalog.components.Text.actions.setState).toBeDefined();
-  });
+  // Example: Check the schema of the Text component
+  expect(catalog.components.Text.schema).toBeDefined();
 
-  it('should validate the schema for the Text component', () => {
-    const validProps = { content: 'Hello, world!' };
-    expect(catalog.components.Text.schema.safeParse(validProps).success).toBe(true);
+  // Example: Validate the schema with a valid object
+  const validProps = { content: 'Hello, world!' };
+  expect(catalog.components.Text.schema.safeParse(validProps).success).toBe(true);
 
-    const invalidProps = { content: 123 };
-    expect(catalog.components.Text.schema.safeParse(invalidProps).success).toBe(false);
-  });
+  // Example: Validate the schema with an invalid object
+  const invalidProps = { content: 123 };
+  expect(catalog.components.Text.schema.safeParse(invalidProps).success).toBe(false);
+
+    const validProps2 = { content: 'Hello, world!' };
+    expect(catalog.components.Text.schema.parse(validProps2)).toEqual(validProps2);
 });

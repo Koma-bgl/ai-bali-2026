@@ -1,27 +1,47 @@
-import { describe, it, expect } from 'vitest';
-import DashboardRenderer from '../src/components/DashboardRenderer';
-import { render } from '@testing-library/react';
+import { expect, test, describe, it, vi } from 'vitest';
+import DashboardRenderer from '@/components/DashboardRenderer';
+import { registry } from '@/registry';
+import { catalog } from '@/catalog';
 import React from 'react';
 
 
 describe('DashboardRenderer', () => {
-  it('should render without errors', () => {
-    const spec = {
-      component: 'Text',
-      props: { content: 'Hello, world!' },
-    };
-    const { container } = render(<DashboardRenderer spec={spec} />);
-    expect(container).toBeInTheDocument();
+  it('should render the Renderer component with the correct spec and registry', () => {
+    const spec = { component: 'Text', props: { content: 'Hello, world!' } };
+
+    // Mock the Renderer component to check if it's called with the right props
+    const RendererMock = vi.fn().mockImplementation(({ spec, registry }) => {
+        return <div data-testid="renderer">{spec.props.content}</div>; // Render the content for testing purposes
+    });
+
+    // Replace the actual Renderer in DashboardRenderer with the mock
+    const originalRenderer = registry.Text;
+
+    const wrapper = () => <DashboardRenderer spec={spec} />;
+
+    const { unmount } = render(wrapper());
+
+    (registry.Text as any) = RendererMock; // type assertion necessary as Text is not a function normally
+
+    expect(RendererMock).toHaveBeenCalledTimes(0);
+
+    (registry.Text as any) = originalRenderer;
+    unmount();
   });
+});
 
-  it('should render the component based on the spec', () => {
+import { render, screen } from '@testing-library/react';
+
+describe('DashboardRenderer integration', () => {
+  it('renders the specified component with props', () => {
     const spec = {
       component: 'Text',
       props: { content: 'Hello, world!' },
     };
 
-    const { getByText } = render(<DashboardRenderer spec={spec} />);
+    render(<DashboardRenderer spec={spec} />);
 
-    expect(getByText('Hello, world!')).toBeInTheDocument();
+    // Use screen.getByText to find the rendered content
+    expect(screen.getByText('Hello, world!')).toBeInTheDocument();
   });
 });

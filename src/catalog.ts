@@ -1,23 +1,22 @@
-import { defineCatalog } from '@json-render/core'
-import { schema } from '@json-render/react'
 import { z } from 'zod'
 
-const TextSchema = z.object({ content: z.string() })
+export const TodoButtonSpec = {
+  id: 'TodoButton',
+  Component: 'TodoButton',
+}
 
-const catalog = defineCatalog(schema, {
-  components: {
-    Text: {
-      props: TextSchema,
-      slots: ['default'],
-    },
-  },
-  actions: {
-    setState: {
-      params: z.object({ key: z.string(), value: z.any() }),
-    },
-  },
-})
-
-export type Catalog = typeof catalog
-
-export default catalog
+export const StatsOverviewSpec = {
+    id: 'StatsOverview',
+    Component: 'StatsOverview',
+    schema: z.object({
+        totalBets: z.number(),
+        winRate: z.number(),
+        netPnL: z.number(),
+        roi: z.number(),
+        currentStreak: z.object({
+            type: z.enum(["win", "loss"]),      
+            count: z.number(),
+        }).required(),
+        averageOdds: z.number(),
+    }).required()
+}

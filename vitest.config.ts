@@ -1,2 +1,11 @@
 import { defineConfig } from 'vitest/config'
-export default defineConfig({ test: { globals: true } })
+import path from 'path'
+
+export default defineConfig({
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+  test: { globals: true },
+})

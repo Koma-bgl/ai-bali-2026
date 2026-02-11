@@ -1,11 +1,14 @@
 import { defineRegistry } from '@json-render/react'
-import catalog from '@/catalog'
+import { TrendLineChart } from '@/src/components/TrendLineChart'
+import catalog from '@/src/catalog'
 
-const { registry, handlers, executeAction } = defineRegistry(catalog, {
+const registry = defineRegistry(catalog, {
   components: {
-    Text: ({ props }) => <div>{props.content}</div>,
+    TrendLineChart: (ctx) => {
+      const { data, height } = ctx.props
+      return <TrendLineChart data={data} height={height} />
+    },
   },
 })
 
-export { registry, handlers, executeAction }
-export default { registry, handlers, executeAction }
+export default registry

@@ -1,23 +1,21 @@
-import { defineCatalog } from '@json-render/core'
-import { schema } from '@json-render/react'
-import { z } from 'zod'
+import * as z from 'zod'
 
-const TextSchema = z.object({ content: z.string() })
-
-const catalog = defineCatalog(schema, {
-  components: {
-    Text: {
-      props: TextSchema,
-      slots: ['default'],
-    },
-  },
-  actions: {
-    setState: {
-      params: z.object({ key: z.string(), value: z.any() }),
-    },
-  },
+const trendLineChartDataSchema = z.object({
+  date: z.string(),
+  cumulativePnL: z.number(),
+  betCount: z.number(),
 })
 
-export type Catalog = typeof catalog
+export const TrendLineChartSchema = z.object({
+  type: z.literal('TrendLineChart'),
+  props: z.object({
+    data: z.array(trendLineChartDataSchema),
+    height: z.number().optional().default(300),
+  }),
+})
+
+const catalog = {
+    TrendLineChart: TrendLineChartSchema
+}
 
 export default catalog

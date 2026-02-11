@@ -10,16 +10,16 @@
     "test": "vitest"
   },
   "dependencies": {
-    "next": "latest",
-    "react": "^19.2.3",
-    "react-dom": "^19.2.3",
-    "typescript": "^5.1.6",
     "@types/node": "^20.4.1",
     "@types/react": "^18.2.14",
     "@types/react-dom": "^18.2.6",
-    "tailwindcss": "^3.3.3",
+    "autoprefixer": "^10.4.14",
+    "next": "^16.1.6",
     "postcss": "^8.4.27",
-    "autoprefixer": "^10.4.14"
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "tailwindcss": "^3.3.3",
+    "typescript": "^5.1.6"
   },
   "devDependencies": {
     "@playwright/test": "^1.36.2",

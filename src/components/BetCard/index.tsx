@@ -105,16 +105,18 @@ export default function BetCard({ props }: { props: BetCardProps }) {
         </div>
       </div>
 
-      {/* Result badge + Dates */}
-      <div className="flex items-center justify-between">
+      {/* Result badge + timestamps */}
+      <div className="flex items-center justify-between border-t border-gray-100 pt-3">
         <span
           className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold capitalize ${resultColorClass}`}
         >
           {result}
         </span>
         <div className="text-right text-xs text-gray-400">
-          <p>Placed: {placedAt}</p>
-          {isSettled && settledAt != null && <p>Settled: {settledAt}</p>}
+          <p>Placed: {new Date(placedAt).toLocaleDateString()}</p>
+          {isSettled && settledAt && (
+            <p>Settled: {new Date(settledAt).toLocaleDateString()}</p>
+          )}
         </div>
       </div>
     </div>

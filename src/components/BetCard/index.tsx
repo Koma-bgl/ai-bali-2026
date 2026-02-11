@@ -88,7 +88,7 @@ export default function BetCard({ props }: { props: BetCardProps }) {
         <div>
           <p className="text-xs text-gray-500">Payout</p>
           <p className="font-semibold text-gray-800">
-            {payout !== null ? formatCurrency(payout) : "—"}
+            {isSettled ? formatCurrency(payout) : "—"}
           </p>
         </div>
         <div>
@@ -114,7 +114,7 @@ export default function BetCard({ props }: { props: BetCardProps }) {
         </span>
         <div className="text-right text-xs text-gray-400">
           <p>Placed: {placedAt}</p>
-          {settledAt && <p>Settled: {settledAt}</p>}
+          {isSettled && settledAt != null && <p>Settled: {settledAt}</p>}
         </div>
       </div>
     </div>

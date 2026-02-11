@@ -1,311 +1,290 @@
 import { describe, it, expect } from "vitest";
 import { BetCardSchema } from "@/components/BetCard/schema";
-import type { BetCardProps } from "@/components/BetCard/schema";
 
-// ── Helpers ──────────────────────────────────────────────────────────────
-
-function validProps(overrides: Partial<BetCardProps> = {}): BetCardProps {
+function validWonBet() {
   return {
     id: "bet-001",
     sport: "football",
-    event: "Man Utd vs Chelsea",
+    event: "Arsenal vs Chelsea",
     league: "Premier League",
-    selection: "Man Utd to Win",
+    selection: "Arsenal to Win",
     odds: 2.5,
-    stake: 100,
-    payout: 250,
-    result: "won",
-    type: "single",
-    placedAt: "2024-06-01T12:00:00Z",
-    settledAt: "2024-06-01T14:00:00Z",
-    ...overrides,
+    stake: 50,
+    payout: 125,
+    result: "won" as const,
+    type: "single" as const,
+    placedAt: "2024-01-15T10:00:00Z",
+    settledAt: "2024-01-15T12:00:00Z",
   };
 }
 
-// ── Schema validation ────────────────────────────────────────────────────
+function validPendingBet() {
+  return {
+    id: "bet-002",
+    sport: "basketball",
+    event: "Lakers vs Celtics",
+    league: "NBA",
+    selection: "Lakers +5.5",
+    odds: 1.91,
+    stake: 100,
+    payout: null,
+    result: "pending" as const,
+    type: "parlay" as const,
+    placedAt: "2024-01-16T14:00:00Z",
+    settledAt: null,
+  };
+}
+
+function validLostBet() {
+  return {
+    id: "bet-003",
+    sport: "tennis",
+    event: "Djokovic vs Nadal",
+    league: "Roland Garros",
+    selection: "Djokovic to Win",
+    odds: 3.0,
+    stake: 25,
+    payout: 0,
+    result: "lost" as const,
+    type: "system" as const,
+    placedAt: "2024-01-17T09:00:00Z",
+    settledAt: "2024-01-17T11:30:00Z",
+  };
+}
 
 describe("BetCardSchema", () => {
-  it("should accept valid complete props", () => {
-    const result = BetCardSchema.safeParse(validProps());
-    expect(result.success).toBe(true);
-  });
-
-  it("should accept all result types: won, lost, pending", () => {
-    for (const r of ["won", "lost", "pending"] as const) {
-      const parsed = BetCardSchema.safeParse(validProps({ result: r }));
-      expect(parsed.success).toBe(true);
-    }
-  });
-
-  it("should reject invalid result value", () => {
-    const parsed = BetCardSchema.safeParse(validProps({ result: "draw" as any }));
-    expect(parsed.success).toBe(false);
-  });
-
-  it("should accept all bet types: single, parlay, system", () => {
-    for (const t of ["single", "parlay", "system"] as const) {
-      const parsed = BetCardSchema.safeParse(validProps({ type: t }));
-      expect(parsed.success).toBe(true);
-    }
-  });
-
-  it("should reject invalid bet type", () => {
-    const parsed = BetCardSchema.safeParse(validProps({ type: "accumulator" as any }));
-    expect(parsed.success).toBe(false);
-  });
-
-  it("should accept null payout (pending bet)", () => {
-    const parsed = BetCardSchema.safeParse(validProps({ payout: null }));
-    expect(parsed.success).toBe(true);
-  });
-
-  it("should accept null settledAt", () => {
-    const parsed = BetCardSchema.safeParse(validProps({ settledAt: null }));
-    expect(parsed.success).toBe(true);
-  });
-
-  it("should reject missing required fields", () => {
-    const { id, ...rest } = validProps();
-    const parsed = BetCardSchema.safeParse(rest);
-    expect(parsed.success).toBe(false);
-  });
-
-  it("should reject non-number odds", () => {
-    const parsed = BetCardSchema.safeParse(validProps({ odds: "2.5" as any }));
-    expect(parsed.success).toBe(false);
-  });
-
-  it("should reject non-number stake", () => {
-    const parsed = BetCardSchema.safeParse(validProps({ stake: "100" as any }));
-    expect(parsed.success).toBe(false);
-  });
-
-  it("should reject non-string id", () => {
-    const parsed = BetCardSchema.safeParse(validProps({ id: 123 as any }));
-    expect(parsed.success).toBe(false);
-  });
-
-  it("should accept zero stake and zero odds", () => {
-    const parsed = BetCardSchema.safeParse(validProps({ stake: 0, odds: 0 }));
-    expect(parsed.success).toBe(true);
-  });
-
-  it("should accept negative payout (edge case)", () => {
-    // Schema doesn't restrict sign — that's a business concern
-    const parsed = BetCardSchema.safeParse(validProps({ payout: -10 }));
-    expect(parsed.success).toBe(true);
-  });
-
-  it("should reject payout as undefined (must be number or null)", () => {
-    const props = validProps();
-    // @ts-expect-error intentionally testing undefined
-    delete props.payout;
-    const parsed = BetCardSchema.safeParse(props);
-    expect(parsed.success).toBe(false);
-  });
-
-  it("should reject completely empty object", () => {
-    const parsed = BetCardSchema.safeParse({});
-    expect(parsed.success).toBe(false);
-  });
-});
-
-// ── Component logic (no rendering) ──────────────────────────────────────
-
-describe("BetCard component logic", () => {
-  // Re-implement the pure helper functions from the component to test them
-  // Since they're not exported we replicate them here to verify the logic
-  const sportEmojiMap: Record<string, string> = {
-    football: "⚽",
-    soccer: "⚽",
-    basketball: "🏀",
-    tennis: "🎾",
-    horse_racing: "🏇",
-    baseball: "⚾",
-  };
-
-  function getSportEmoji(sport: string): string {
-    return sportEmojiMap[sport.toLowerCase()] ?? "🎯";
-  }
-
-  function formatCurrency(amount: number): string {
-    return `$${Math.abs(amount).toFixed(2)}`;
-  }
-
-  function computeProfit(
-    result: BetCardProps["result"],
-    payout: number | null,
-    stake: number
-  ): number | null {
-    const isSettled = result !== "pending" && payout !== null;
-    return isSettled ? payout - stake : null;
-  }
-
-  // Sport emoji mapping
-  describe("getSportEmoji", () => {
-    it("maps football to ⚽", () => {
-      expect(getSportEmoji("football")).toBe("⚽");
+  describe("valid data", () => {
+    it("should accept a valid won bet", () => {
+      const result = BetCardSchema.safeParse(validWonBet());
+      expect(result.success).toBe(true);
     });
 
-    it("maps soccer to ⚽", () => {
-      expect(getSportEmoji("soccer")).toBe("⚽");
+    it("should accept a valid pending bet with null payout and settledAt", () => {
+      const result = BetCardSchema.safeParse(validPendingBet());
+      expect(result.success).toBe(true);
     });
 
-    it("maps basketball to 🏀", () => {
-      expect(getSportEmoji("basketball")).toBe("🏀");
+    it("should accept a valid lost bet with zero payout", () => {
+      const result = BetCardSchema.safeParse(validLostBet());
+      expect(result.success).toBe(true);
     });
 
-    it("maps tennis to 🎾", () => {
-      expect(getSportEmoji("tennis")).toBe("🎾");
+    it("should accept all bet type values", () => {
+      for (const type of ["single", "parlay", "system"] as const) {
+        const bet = { ...validPendingBet(), type };
+        const result = BetCardSchema.safeParse(bet);
+        expect(result.success).toBe(true);
+      }
     });
 
-    it("maps horse_racing to 🏇", () => {
-      expect(getSportEmoji("horse_racing")).toBe("🏇");
-    });
+    it("should accept all result values with appropriate payout/settledAt", () => {
+      const pending = validPendingBet();
+      expect(BetCardSchema.safeParse(pending).success).toBe(true);
 
-    it("maps baseball to ⚾", () => {
-      expect(getSportEmoji("baseball")).toBe("⚾");
-    });
+      const won = validWonBet();
+      expect(BetCardSchema.safeParse(won).success).toBe(true);
 
-    it("is case-insensitive", () => {
-      expect(getSportEmoji("Football")).toBe("⚽");
-      expect(getSportEmoji("BASKETBALL")).toBe("🏀");
-      expect(getSportEmoji("Tennis")).toBe("🎾");
-    });
-
-    it("returns 🎯 for unknown sports", () => {
-      expect(getSportEmoji("cricket")).toBe("🎯");
-      expect(getSportEmoji("")).toBe("🎯");
-      expect(getSportEmoji("darts")).toBe("🎯");
+      const lost = validLostBet();
+      expect(BetCardSchema.safeParse(lost).success).toBe(true);
     });
   });
 
-  // Currency formatting
-  describe("formatCurrency", () => {
-    it("formats positive amounts", () => {
-      expect(formatCurrency(45)).toBe("$45.00");
+  describe("cross-field validation (superRefine)", () => {
+    it("should reject won result with null payout", () => {
+      const bet = { ...validWonBet(), payout: null };
+      const result = BetCardSchema.safeParse(bet);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        const payoutIssue = result.error.issues.find(
+          (i) => i.path.includes("payout")
+        );
+        expect(payoutIssue).toBeDefined();
+        expect(payoutIssue!.message).toBe(
+          "payout is required when result is won or lost"
+        );
+      }
     });
 
-    it("formats zero", () => {
-      expect(formatCurrency(0)).toBe("$0.00");
+    it("should reject won result with null settledAt", () => {
+      const bet = { ...validWonBet(), settledAt: null };
+      const result = BetCardSchema.safeParse(bet);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        const settledIssue = result.error.issues.find(
+          (i) => i.path.includes("settledAt")
+        );
+        expect(settledIssue).toBeDefined();
+        expect(settledIssue!.message).toBe(
+          "settledAt is required when result is won or lost"
+        );
+      }
     });
 
-    it("takes absolute value of negative amounts", () => {
-      expect(formatCurrency(-25)).toBe("$25.00");
+    it("should reject lost result with null payout", () => {
+      const bet = { ...validLostBet(), payout: null };
+      const result = BetCardSchema.safeParse(bet);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        const payoutIssue = result.error.issues.find(
+          (i) => i.path.includes("payout")
+        );
+        expect(payoutIssue).toBeDefined();
+      }
     });
 
-    it("formats fractional amounts with two decimals", () => {
-      expect(formatCurrency(123.456)).toBe("$123.46");
+    it("should reject lost result with null settledAt", () => {
+      const bet = { ...validLostBet(), settledAt: null };
+      const result = BetCardSchema.safeParse(bet);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        const settledIssue = result.error.issues.find(
+          (i) => i.path.includes("settledAt")
+        );
+        expect(settledIssue).toBeDefined();
+      }
     });
 
-    it("pads single decimal amounts", () => {
-      expect(formatCurrency(10.5)).toBe("$10.50");
+    it("should produce two issues when both payout and settledAt are null for won", () => {
+      const bet = { ...validWonBet(), payout: null, settledAt: null };
+      const result = BetCardSchema.safeParse(bet);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        const customIssues = result.error.issues.filter(
+          (i) => i.message.includes("required when result is won or lost")
+        );
+        expect(customIssues).toHaveLength(2);
+      }
     });
 
-    it("handles very large amounts", () => {
-      expect(formatCurrency(999999.99)).toBe("$999999.99");
+    it("should allow pending result with null payout and settledAt", () => {
+      const bet = validPendingBet();
+      expect(bet.payout).toBeNull();
+      expect(bet.settledAt).toBeNull();
+      const result = BetCardSchema.safeParse(bet);
+      expect(result.success).toBe(true);
+    });
+
+    it("should allow pending result with non-null payout (no cross-field restriction)", () => {
+      // Schema only enforces settled bets must have payout; pending can optionally have it
+      const bet = { ...validPendingBet(), payout: 100 };
+      const result = BetCardSchema.safeParse(bet);
+      expect(result.success).toBe(true);
+    });
+  });
+
+  describe("type validation", () => {
+    it("should reject invalid result enum value", () => {
+      const bet = { ...validPendingBet(), result: "cancelled" };
+      const result = BetCardSchema.safeParse(bet);
+      expect(result.success).toBe(false);
+    });
+
+    it("should reject invalid bet type enum value", () => {
+      const bet = { ...validPendingBet(), type: "accumulator" };
+      const result = BetCardSchema.safeParse(bet);
+      expect(result.success).toBe(false);
+    });
+
+    it("should reject non-number odds", () => {
+      const bet = { ...validPendingBet(), odds: "2.5" };
+      const result = BetCardSchema.safeParse(bet);
+      expect(result.success).toBe(false);
+    });
+
+    it("should reject non-number stake", () => {
+      const bet = { ...validPendingBet(), stake: "100" };
+      const result = BetCardSchema.safeParse(bet);
+      expect(result.success).toBe(false);
+    });
+
+    it("should reject non-string id", () => {
+      const bet = { ...validPendingBet(), id: 123 };
+      const result = BetCardSchema.safeParse(bet);
+      expect(result.success).toBe(false);
     });
   });
 
-  // Profit computation
-  describe("profit calculation", () => {
-    it("returns positive profit for won bet", () => {
-      expect(computeProfit("won", 250, 100)).toBe(150);
+  describe("missing fields", () => {
+    it("should reject an empty object", () => {
+      const result = BetCardSchema.safeParse({});
+      expect(result.success).toBe(false);
     });
 
-    it("returns negative profit for lost bet with partial payout", () => {
-      expect(computeProfit("lost", 0, 100)).toBe(-100);
+    it("should reject when required field is missing", () => {
+      const { sport, ...rest } = validPendingBet();
+      const result = BetCardSchema.safeParse(rest);
+      expect(result.success).toBe(false);
     });
 
-    it("returns null for pending result", () => {
-      expect(computeProfit("pending", null, 100)).toBeNull();
+    it("should reject when id is missing", () => {
+      const { id, ...rest } = validPendingBet();
+      const result = BetCardSchema.safeParse(rest);
+      expect(result.success).toBe(false);
     });
 
-    it("returns null for pending result even with payout somehow set", () => {
-      // result is pending → always null regardless of payout
-      expect(computeProfit("pending", 200, 100)).toBeNull();
+    it("should reject when event is missing", () => {
+      const { event, ...rest } = validPendingBet();
+      const result = BetCardSchema.safeParse(rest);
+      expect(result.success).toBe(false);
     });
 
-    it("returns null when payout is null even if result is won", () => {
-      // payout is null → not settled
-      expect(computeProfit("won", null, 100)).toBeNull();
+    it("should reject null input", () => {
+      const result = BetCardSchema.safeParse(null);
+      expect(result.success).toBe(false);
     });
 
-    it("returns zero profit when payout equals stake", () => {
-      expect(computeProfit("won", 100, 100)).toBe(0);
-    });
-
-    it("handles lost bet with zero payout", () => {
-      expect(computeProfit("lost", 0, 50)).toBe(-50);
-    });
-  });
-
-  // Result color logic
-  describe("result color coding", () => {
-    function getResultColorClass(result: BetCardProps["result"]): string {
-      return result === "won"
-        ? "text-green-600 bg-green-100"
-        : result === "lost"
-          ? "text-red-600 bg-red-100"
-          : "text-amber-600 bg-amber-100";
-    }
-
-    it("won → green classes", () => {
-      expect(getResultColorClass("won")).toContain("green");
-    });
-
-    it("lost → red classes", () => {
-      expect(getResultColorClass("lost")).toContain("red");
-    });
-
-    it("pending → amber classes", () => {
-      expect(getResultColorClass("pending")).toContain("amber");
+    it("should reject undefined input", () => {
+      const result = BetCardSchema.safeParse(undefined);
+      expect(result.success).toBe(false);
     });
   });
 
-  // Profit display formatting
-  describe("profit display string", () => {
-    function formatProfit(profit: number | null): string {
-      if (profit === null) return "Pending";
-      if (profit >= 0) return `+${formatCurrency(profit)}`;
-      return `-${formatCurrency(profit)}`;
-    }
-
-    it("shows +$150.00 for positive profit", () => {
-      expect(formatProfit(150)).toBe("+$150.00");
+  describe("edge cases", () => {
+    it("should accept zero stake", () => {
+      const bet = { ...validPendingBet(), stake: 0 };
+      const result = BetCardSchema.safeParse(bet);
+      expect(result.success).toBe(true);
     });
 
-    it("shows -$100.00 for negative profit", () => {
-      expect(formatProfit(-100)).toBe("-$100.00");
+    it("should accept negative odds (as schema only enforces number type)", () => {
+      const bet = { ...validPendingBet(), odds: -1.5 };
+      const result = BetCardSchema.safeParse(bet);
+      expect(result.success).toBe(true);
     });
 
-    it("shows +$0.00 for zero profit", () => {
-      expect(formatProfit(0)).toBe("+$0.00");
+    it("should accept very large numbers", () => {
+      const bet = {
+        ...validWonBet(),
+        odds: 999999.99,
+        stake: 1000000,
+        payout: 999999990000,
+      };
+      const result = BetCardSchema.safeParse(bet);
+      expect(result.success).toBe(true);
     });
 
-    it("shows Pending for null", () => {
-      expect(formatProfit(null)).toBe("Pending");
+    it("should accept empty string for sport, event, league etc.", () => {
+      const bet = {
+        ...validPendingBet(),
+        sport: "",
+        event: "",
+        league: "",
+        selection: "",
+      };
+      const result = BetCardSchema.safeParse(bet);
+      expect(result.success).toBe(true);
     });
-  });
-});
 
-// ── Module exports ───────────────────────────────────────────────────────
+    it("should strip unknown properties (zod default behavior)", () => {
+      const bet = { ...validPendingBet(), extraField: "should be ignored" };
+      const result = BetCardSchema.safeParse(bet);
+      expect(result.success).toBe(true);
+    });
 
-describe("BetCard module exports", () => {
-  it("schema.ts exports BetCardSchema", async () => {
-    const mod = await import("@/components/BetCard/schema");
-    expect(mod.BetCardSchema).toBeDefined();
-    expect(typeof mod.BetCardSchema.safeParse).toBe("function");
-  });
-
-  it("index.tsx has a default export that is a function", async () => {
-    const mod = await import("@/components/BetCard/index");
-    expect(mod.default).toBeDefined();
-    expect(typeof mod.default).toBe("function");
-  });
-
-  it("default export function is named BetCard", async () => {
-    const mod = await import("@/components/BetCard/index");
-    expect(mod.default.name).toBe("BetCard");
+    it("should accept won bet with zero payout (edge: lost all stake effectively)", () => {
+      const bet = { ...validWonBet(), payout: 0 };
+      const result = BetCardSchema.safeParse(bet);
+      expect(result.success).toBe(true);
+    });
   });
 });

@@ -1,18 +1,19 @@
-import { defineCatalog } from '@json-render/react'
+import { defineCatalog } from '@json-render/core'
+import { schema } from '@json-render/react'
 import { z } from 'zod'
 
 const TextSchema = z.object({ content: z.string() })
 
-const catalog = defineCatalog({
+const catalog = defineCatalog(schema, {
   components: {
     Text: {
-      schema: TextSchema,
+      props: TextSchema,
+      slots: ['default'],
     },
   },
   actions: {
     setState: {
-      schema: z.object({ key: z.string(), value: z.any() }),
-      action: () => {},
+      params: z.object({ key: z.string(), value: z.any() }),
     },
   },
 })

@@ -1,30 +1,29 @@
 import { describe, it, expect } from 'vitest'
-import { createCatalog } from '@json-render/react'
+import { createCatalog } from '@json-render/core'
 import { z } from 'zod'
 
 describe('Catalog', () => {
   const catalog = createCatalog({
     components: {
       Text: {
-        schema: z.object({ content: z.string() }),
+        props: z.object({ content: z.string() }),
       },
     },
     actions: {
       setState: {
-        schema: z.object({ key: z.string(), value: z.any() }),
-        action: () => {},
+        params: z.object({ key: z.string(), value: z.any() }),
       },
     },
   })
 
   it('should define the Text component with the correct schema', () => {
-    expect(catalog.components.Text.schema).toBeDefined()
-    expect(catalog.components.Text.schema).instanceOf(z.ZodObject)
+    expect(catalog.components.Text.props).toBeDefined()
+    expect(catalog.components.Text.props).instanceOf(z.ZodObject)
   })
 
   it('should define the setState action with the correct schema', () => {
-    expect(catalog.actions.setState.schema).toBeDefined()
-    expect(catalog.actions.setState.schema).instanceOf(z.ZodObject)
+    expect(catalog.actions.setState.params).toBeDefined()
+    expect(catalog.actions.setState.params).instanceOf(z.ZodObject)
   })
 
   it('should have a type definition', () => {

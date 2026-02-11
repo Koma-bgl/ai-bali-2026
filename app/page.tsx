@@ -1,6 +1,12 @@
 import TodoButton from './components/TodoButton';
+import DashboardRenderer from '@/components/DashboardRenderer';
 
 export default function Home() {
+  const spec = {
+    component: 'Text',
+    props: { content: 'Hello from json-render!' },
+  };
+
   return (
     <main className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-8">
       <div className="max-w-4xl mx-auto">
@@ -23,6 +29,7 @@ export default function Home() {
           </div>
           
           {/* Todo List goes here */}
+          <DashboardRenderer spec={spec} />
 
           <div className="mt-8 pt-6 border-t border-gray-200">
             <h3 className="text-lg font-semibold text-gray-800 mb-3">How to use:</h3>

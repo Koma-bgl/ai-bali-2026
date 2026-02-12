@@ -7,98 +7,124 @@ import TrendLineChart from "@/components/TrendLineChart/index";
 import { TrendLineChartSchema } from "@/components/TrendLineChart/schema";
 import type { TrendLineChartProps } from "@/components/TrendLineChart/schema";
 
+// ---------------------------------------------------------------------------
+// formatDateLabel – UTC-safe "Mon DD" formatting
+// ---------------------------------------------------------------------------
 describe("formatDateLabel", () => {
-  it('should format ISO date string to "Mon DD" format', () => {
-    const result = formatDateLabel("2024-01-15");
-    expect(result).toMatch(/Jan/);
-    expect(result).toMatch(/15/);
+  it('formats "2024-01-15" as "Jan 15"', () => {
+    expect(formatDateLabel("2024-01-15")).toBe("Jan 15");
   });
 
-  it('should format another date correctly', () => {
-    const result = formatDateLabel("2024-12-25");
-    expect(result).toMatch(/Dec/);
-    expect(result).toMatch(/25/);
+  it('formats "2024-12-25" as "Dec 25"', () => {
+    expect(formatDateLabel("2024-12-25")).toBe("Dec 25");
   });
 
-  it('should format a date at start of month', () => {
-    const result = formatDateLabel("2024-03-01");
-    expect(result).toMatch(/Mar/);
-    expect(result).toMatch(/1/);
+  it('formats first day of month "2024-03-01" as "Mar 1"', () => {
+    expect(formatDateLabel("2024-03-01")).toBe("Mar 1");
   });
 
-  it('should handle end of year date', () => {
-    const result = formatDateLabel("2024-12-31");
-    expect(result).toMatch(/Dec/);
-    expect(result).toMatch(/31/);
+  it('formats last day of year "2024-12-31" as "Dec 31"', () => {
+    expect(formatDateLabel("2024-12-31")).toBe("Dec 31");
   });
 
-  it("should handle date with time component (ISO datetime)", () => {
-    const result = formatDateLabel("2024-06-15T14:30:00Z");
-    expect(result).toMatch(/Jun/);
-    expect(result).toMatch(/15/);
+  it("handles ISO datetime with time component", () => {
+    expect(formatDateLabel("2024-06-15T14:30:00Z")).toBe("Jun 15");
+  });
+
+  // Critical UTC test: "2024-01-01" parsed as UTC midnight must NOT shift to
+  // Dec 31 in western-hemisphere local time.
+  it("does not shift date backward due to timezone offset (UTC fix)", () => {
+    expect(formatDateLabel("2024-01-01")).toBe("Jan 1");
+  });
+
+  it("handles Feb 29 on a leap year", () => {
+    expect(formatDateLabel("2024-02-29")).toBe("Feb 29");
+  });
+
+  it("handles mid-year date", () => {
+    expect(formatDateLabel("2024-07-04")).toBe("Jul 4");
+  });
+
+  it("handles datetime at end of UTC day", () => {
+    expect(formatDateLabel("2024-09-30T23:59:59Z")).toBe("Sep 30");
+  });
+
+  it("handles datetime at start of UTC day", () => {
+    expect(formatDateLabel("2024-11-15T00:00:00Z")).toBe("Nov 15");
   });
 });
 
+// ---------------------------------------------------------------------------
+// formatCurrency
+// ---------------------------------------------------------------------------
 describe("formatCurrency", () => {
-  it("should format positive amount with dollar sign", () => {
+  it("formats positive amount with dollar sign", () => {
     expect(formatCurrency(1234.56)).toBe("$1,234.56");
   });
 
-  it("should format negative amount with minus and dollar sign", () => {
+  it("formats negative amount with minus and dollar sign", () => {
     expect(formatCurrency(-1234.56)).toBe("-$1,234.56");
   });
 
-  it("should format zero", () => {
+  it("formats zero", () => {
     expect(formatCurrency(0)).toBe("$0.00");
   });
 
-  it("should format small positive amount", () => {
+  it("formats small positive amount", () => {
     expect(formatCurrency(0.5)).toBe("$0.50");
   });
 
-  it("should format small negative amount", () => {
+  it("formats small negative amount", () => {
     expect(formatCurrency(-0.01)).toBe("-$0.01");
   });
 
-  it("should format whole number with two decimal places", () => {
+  it("formats whole number with two decimal places", () => {
     expect(formatCurrency(100)).toBe("$100.00");
   });
 
-  it("should format large amount with comma separators", () => {
+  it("formats large amount with comma separators", () => {
     expect(formatCurrency(1000000)).toBe("$1,000,000.00");
   });
 
-  it("should format negative large amount", () => {
+  it("formats negative large amount", () => {
     expect(formatCurrency(-50000)).toBe("-$50,000.00");
   });
 
-  it("should round to two decimal places", () => {
-    const result = formatCurrency(99.999);
-    expect(result).toBe("$100.00");
+  it("rounds to two decimal places", () => {
+    expect(formatCurrency(99.999)).toBe("$100.00");
   });
 
-  it("should handle very small fraction", () => {
+  it("rounds very small fraction to zero", () => {
     expect(formatCurrency(0.001)).toBe("$0.00");
+  });
+
+  it("handles negative zero as positive zero", () => {
+    expect(formatCurrency(-0)).toBe("$0.00");
+  });
+
+  it("pads single-digit fractional to two places", () => {
+    expect(formatCurrency(5.1)).toBe("$5.10");
   });
 });
 
+// ---------------------------------------------------------------------------
+// Component exports & signature
+// ---------------------------------------------------------------------------
 describe("TrendLineChart component exports", () => {
-  it("should have a default export that is a function", () => {
+  it("default export is a function", () => {
     expect(typeof TrendLineChart).toBe("function");
   });
 
-  it("should be named TrendLineChart", () => {
+  it("is named TrendLineChart", () => {
     expect(TrendLineChart.name).toBe("TrendLineChart");
   });
 
-  it("should export TrendLineChartSchema from schema module", () => {
+  it("exports TrendLineChartSchema from schema module", () => {
     expect(TrendLineChartSchema).toBeDefined();
     expect(typeof TrendLineChartSchema.safeParse).toBe("function");
   });
 
-  it("should export TrendLineChartProps type (compile-time check)", () => {
-    // This is a compile-time type check — if TrendLineChartProps doesn't exist,
-    // TypeScript will fail. At runtime we just verify the schema produces the right shape.
+  it("schema-parsed props satisfy TrendLineChartProps type", () => {
     const parsed = TrendLineChartSchema.parse({
       data: [{ date: "2024-01-01", cumulativePnL: 50, betCount: 2 }],
     });
@@ -109,12 +135,14 @@ describe("TrendLineChart component exports", () => {
 });
 
 describe("TrendLineChart component signature", () => {
-  it("should accept { props: TrendLineChartProps } pattern (type check)", () => {
-    // Verify the function signature matches json-render's ComponentFn pattern.
-    // We can't render without DOM, but we can verify the function accepts the shape.
+  it("accepts { props: TrendLineChartProps } wrapper pattern", () => {
     const componentFn = TrendLineChart as (arg: {
       props: TrendLineChartProps;
     }) => unknown;
     expect(typeof componentFn).toBe("function");
+  });
+
+  it("has function length of 1 (single destructured arg)", () => {
+    expect(TrendLineChart.length).toBe(1);
   });
 });

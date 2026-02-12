@@ -2,7 +2,7 @@ import { z } from "zod";
 
 const BetSchema = z.object({
   id: z.string(),
-  date: z.string(),
+  date: z.string().datetime(),
   event: z.string(),
   type: z.enum(["single", "parlay", "system"]),
   amount: z.number(),
@@ -13,7 +13,7 @@ const BetSchema = z.object({
 
 export const RecentBetsSchema = z.object({
   bets: z.array(BetSchema),
-  maxRows: z.number().optional().default(10),
+  maxRows: z.number().int().min(1).optional().default(10),
 });
 
 export type Bet = z.infer<typeof BetSchema>;

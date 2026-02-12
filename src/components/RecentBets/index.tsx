@@ -48,6 +48,7 @@ export default function RecentBets({ props }: { props: RecentBetsProps }) {
               (header) => (
                 <th
                   key={header}
+                  scope="col"
                   className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500"
                 >
                   {header}

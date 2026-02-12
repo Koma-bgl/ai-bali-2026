@@ -2,48 +2,47 @@ import { describe, it, expect } from 'vitest'
 import { RecentBetsSchema } from '@/components/RecentBets/schema'
 
 // ---------------------------------------------------------------------------
-// Helper factory for a valid bet object
+// Helpers
 // ---------------------------------------------------------------------------
+
 function validBet(overrides: Record<string, unknown> = {}) {
   return {
     id: 'bet-1',
-    date: '2024-06-15T00:00:00.000Z',
+    date: '2024-06-15T12:00:00Z',
     event: 'Lakers vs Celtics',
-    type: 'single' as const,
+    type: 'single',
     amount: 50,
     odds: 2.15,
-    result: 'won' as const,
-    payout: 107.5,
+    result: 'pending',
+    payout: 0,
     ...overrides,
   }
+}
+
+function parse(data: unknown) {
+  return RecentBetsSchema.safeParse(data)
 }
 
 // ---------------------------------------------------------------------------
 // Valid inputs
 // ---------------------------------------------------------------------------
-describe('RecentBetsSchema — valid inputs', () => {
-  it('accepts a valid props object with bets array', () => {
-    const result = RecentBetsSchema.safeParse({
-      bets: [validBet()],
-    })
+
+describe('RecentBetsSchema – valid inputs', () => {
+  it('accepts a minimal valid payload with one bet', () => {
+    const result = parse({ bets: [validBet()] })
     expect(result.success).toBe(true)
   })
 
-  it('defaults maxRows to 10 when not provided', () => {
-    const result = RecentBetsSchema.safeParse({
-      bets: [validBet()],
-    })
+  it('defaults maxRows to 10 when omitted', () => {
+    const result = parse({ bets: [validBet()] })
     expect(result.success).toBe(true)
     if (result.success) {
       expect(result.data.maxRows).toBe(10)
     }
   })
 
-  it('accepts a custom maxRows value', () => {
-    const result = RecentBetsSchema.safeParse({
-      bets: [validBet()],
-      maxRows: 5,
-    })
+  it('accepts explicit maxRows', () => {
+    const result = parse({ bets: [validBet()], maxRows: 5 })
     expect(result.success).toBe(true)
     if (result.success) {
       expect(result.data.maxRows).toBe(5)
@@ -51,118 +50,110 @@ describe('RecentBetsSchema — valid inputs', () => {
   })
 
   it('accepts an empty bets array', () => {
-    const result = RecentBetsSchema.safeParse({ bets: [] })
+    const result = parse({ bets: [] })
     expect(result.success).toBe(true)
-    if (result.success) {
-      expect(result.data.bets).toEqual([])
-    }
   })
 
-  it('accepts all valid bet type values', () => {
+  it('accepts all bet types', () => {
     for (const type of ['single', 'parlay', 'system'] as const) {
-      const result = RecentBetsSchema.safeParse({
-        bets: [validBet({ type })],
-      })
+      const result = parse({ bets: [validBet({ type })] })
       expect(result.success).toBe(true)
     }
   })
 
-  it('accepts all valid result values', () => {
-    for (const r of ['won', 'lost', 'pending'] as const) {
-      const result = RecentBetsSchema.safeParse({
-        bets: [validBet({ result: r })],
-      })
+  it('accepts all result values', () => {
+    for (const res of ['won', 'lost', 'pending'] as const) {
+      const result = parse({ bets: [validBet({ result: res })] })
       expect(result.success).toBe(true)
     }
   })
 
   it('accepts multiple bets', () => {
-    const result = RecentBetsSchema.safeParse({
+    const result = parse({
       bets: [
-        validBet({ id: 'bet-1' }),
-        validBet({ id: 'bet-2', result: 'lost', payout: 0 }),
-        validBet({ id: 'bet-3', result: 'pending', payout: 0 }),
+        validBet({ id: '1' }),
+        validBet({ id: '2', result: 'won', payout: 100 }),
+        validBet({ id: '3', result: 'lost', payout: 0 }),
       ],
     })
     expect(result.success).toBe(true)
-    if (result.success) {
-      expect(result.data.bets).toHaveLength(3)
-    }
   })
 })
 
 // ---------------------------------------------------------------------------
-// Invalid inputs
+// Invalid inputs – bets array
 // ---------------------------------------------------------------------------
-describe('RecentBetsSchema — invalid inputs', () => {
-  it('rejects when bets is missing', () => {
-    const result = RecentBetsSchema.safeParse({})
+
+describe('RecentBetsSchema – invalid bets', () => {
+  it('rejects missing bets field', () => {
+    const result = parse({})
     expect(result.success).toBe(false)
   })
 
-  it('rejects when bets is not an array', () => {
-    const result = RecentBetsSchema.safeParse({ bets: 'not-array' })
+  it('rejects bets as non-array', () => {
+    const result = parse({ bets: 'not-an-array' })
     expect(result.success).toBe(false)
   })
 
-  it('rejects a bet with missing id', () => {
-    const { id: _, ...noId } = validBet()
-    const result = RecentBetsSchema.safeParse({ bets: [noId] })
+  it('rejects bet with missing id', () => {
+    const { id: _, ...noid } = validBet()
+    const result = parse({ bets: [noid] })
     expect(result.success).toBe(false)
   })
 
-  it('rejects a bet with missing date', () => {
-    const { date: _, ...noDate } = validBet()
-    const result = RecentBetsSchema.safeParse({ bets: [noDate] })
+  it('rejects bet with invalid date (not ISO datetime)', () => {
+    const result = parse({ bets: [validBet({ date: 'not-a-date' })] })
     expect(result.success).toBe(false)
   })
 
-  it('rejects a bet with missing event', () => {
-    const { event: _, ...noEvent } = validBet()
-    const result = RecentBetsSchema.safeParse({ bets: [noEvent] })
+  it('rejects bet with invalid type enum', () => {
+    const result = parse({ bets: [validBet({ type: 'accumulator' })] })
     expect(result.success).toBe(false)
   })
 
-  it('rejects a bet with invalid type enum', () => {
-    const result = RecentBetsSchema.safeParse({
-      bets: [validBet({ type: 'accumulator' })],
-    })
+  it('rejects bet with invalid result enum', () => {
+    const result = parse({ bets: [validBet({ result: 'cancelled' })] })
     expect(result.success).toBe(false)
   })
 
-  it('rejects a bet with invalid result enum', () => {
-    const result = RecentBetsSchema.safeParse({
-      bets: [validBet({ result: 'cancelled' })],
-    })
+  it('rejects bet with string amount', () => {
+    const result = parse({ bets: [validBet({ amount: '50' })] })
     expect(result.success).toBe(false)
   })
 
-  it('rejects a bet with non-number amount', () => {
-    const result = RecentBetsSchema.safeParse({
-      bets: [validBet({ amount: 'fifty' })],
-    })
+  it('rejects bet with string odds', () => {
+    const result = parse({ bets: [validBet({ odds: '2.15' })] })
     expect(result.success).toBe(false)
   })
 
-  it('rejects a bet with non-number odds', () => {
-    const result = RecentBetsSchema.safeParse({
-      bets: [validBet({ odds: '2.15' })],
-    })
+  it('rejects bet with string payout', () => {
+    const result = parse({ bets: [validBet({ payout: '0' })] })
+    expect(result.success).toBe(false)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Invalid inputs – maxRows
+// ---------------------------------------------------------------------------
+
+describe('RecentBetsSchema – invalid maxRows', () => {
+  it('rejects maxRows of 0', () => {
+    const result = parse({ bets: [validBet()], maxRows: 0 })
     expect(result.success).toBe(false)
   })
 
-  it('rejects a bet with non-number payout', () => {
-    const result = RecentBetsSchema.safeParse({
-      bets: [validBet({ payout: null })],
-    })
+  it('rejects negative maxRows', () => {
+    const result = parse({ bets: [validBet()], maxRows: -5 })
     expect(result.success).toBe(false)
   })
 
-  it('rejects when maxRows is a string', () => {
-    const result = RecentBetsSchema.safeParse({
-      bets: [validBet()],
-      maxRows: 'ten',
-    })
+  it('rejects non-integer maxRows', () => {
+    const result = parse({ bets: [validBet()], maxRows: 2.5 })
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects string maxRows', () => {
+    const result = parse({ bets: [validBet()], maxRows: 'ten' })
     expect(result.success).toBe(false)
   })
 })

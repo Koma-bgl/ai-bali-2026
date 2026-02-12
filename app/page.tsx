@@ -9,7 +9,7 @@ export default function Home() {
             Todo App
           </h1>
           <p className="text-gray-600">
-            Organize your tasks and boost your productivity
+            Organize your tasks and boost your productivity - can't agree more
           </p>
         </header>
         

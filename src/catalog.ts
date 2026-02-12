@@ -1,6 +1,9 @@
 import { defineCatalog } from '@json-render/core'
 import { schema } from '@json-render/react'
 import { z } from 'zod'
+import { BetCardSchema } from './components/BetCard/schema'
+import { StatsOverviewSchema } from './components/StatsOverview/schema'
+import { TrendLineChartSchema } from './components/TrendLineChart/schema'
 
 const TextSchema = z.object({ content: z.string() })
 
@@ -9,6 +12,15 @@ const catalog = defineCatalog(schema, {
     Text: {
       props: TextSchema,
       slots: ['default'],
+    },
+    BetCard: {
+      props: BetCardSchema,
+    },
+    StatsOverview: {
+      props: StatsOverviewSchema,
+    },
+    TrendLineChart: {
+      props: TrendLineChartSchema,
     },
   },
   actions: {

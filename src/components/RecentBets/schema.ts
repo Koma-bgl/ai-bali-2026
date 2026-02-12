@@ -2,7 +2,7 @@ import { z } from "zod";
 
 const BetSchema = z.object({
   id: z.string(),
-  date: z.string().datetime(),
+  date: z.iso.datetime(),
   event: z.string(),
   type: z.enum(["single", "parlay", "system"]),
   amount: z.number(),

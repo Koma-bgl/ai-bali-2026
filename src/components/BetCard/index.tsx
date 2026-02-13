@@ -63,7 +63,9 @@ export default function BetCard({ props }: { props: BetCardProps }) {
 
   return (
     <div
-      className={`rounded-lg border ${resultBorderClass} bg-white p-4 shadow-sm`}
+      /* w-full ensures the card stretches to fill its parent container,
+         preventing excess whitespace on the right in flex/grid layouts */
+      className={`w-full rounded-lg border ${resultBorderClass} bg-white p-4 shadow-sm`}
       data-testid="bet-card"
     >
       {/* Header: Sport emoji + Event + League */}

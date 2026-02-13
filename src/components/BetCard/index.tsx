@@ -29,6 +29,21 @@ export function formatDate(isoString: string): string {
   });
 }
 
+/**
+ * Returns the appropriate profit display string.
+ * Positive profits are prefixed with "+", negatives with "-".
+ * Returns null for unsettled bets.
+ */
+export function formatProfit(profit: number | null): string | null {
+  if (profit === null) {
+    return null;
+  }
+  if (profit >= 0) {
+    return `+${formatCurrency(profit)}`;
+  }
+  return `-${formatCurrency(profit)}`;
+}
+
 export default function BetCard({ props }: { props: BetCardProps }) {
   const {
     sport,
@@ -61,6 +76,8 @@ export default function BetCard({ props }: { props: BetCardProps }) {
         ? "border-red-200"
         : "border-amber-200";
 
+  const profitDisplay = formatProfit(profit);
+
   return (
     <div
       /* w-full ensures the card stretches to fill its parent container,
@@ -84,53 +101,63 @@ export default function BetCard({ props }: { props: BetCardProps }) {
         </span>
       </div>
 
-      {/* Selection + Odds */}
-      <div className="mb-3 rounded-md bg-gray-50 px-3 py-2">
-        <p className="text-sm font-medium text-gray-800">{selection}</p>
-        <p className="text-xs text-gray-500">
-          Odds:{" "}
-          <span className="font-semibold text-gray-700">{odds.toFixed(2)}</span>
-        </p>
-      </div>
-
-      {/* Stake / Payout / Profit */}
-      <div className="mb-3 grid grid-cols-3 gap-2 text-center text-sm">
+      {/* Selection + Odds + Stake — compact info row */}
+      <div className="mb-3 flex items-center justify-between rounded-md bg-gray-50 px-3 py-2">
         <div>
-          <p className="text-xs text-gray-500">Stake</p>
-          <p className="font-semibold text-gray-800">{formatCurrency(stake)}</p>
-        </div>
-        <div>
-          <p className="text-xs text-gray-500">Payout</p>
-          <p className="font-semibold text-gray-800">
-            {isSettled ? formatCurrency(payout) : "—"}
+          <p className="text-sm font-medium text-gray-800">{selection}</p>
+          <p className="text-xs text-gray-500">
+            Odds:{" "}
+            <span className="font-semibold text-gray-700">
+              {odds.toFixed(2)}
+            </span>
           </p>
         </div>
-        <div>
-          <p className="text-xs text-gray-500">Profit</p>
-          {profit !== null ? (
-            <p
-              className={`font-semibold ${profit >= 0 ? "text-green-600" : "text-red-600"}`}
-            >
-              {profit >= 0
-                ? `+${formatCurrency(profit)}`
-                : `-${formatCurrency(profit)}`}
-            </p>
-          ) : (
-            <p className="font-semibold text-gray-400">Pending</p>
-          )}
+        <div className="text-right">
+          <p className="text-xs text-gray-500">Stake</p>
+          <p className="text-sm font-semibold text-gray-800">
+            {formatCurrency(stake)}
+          </p>
         </div>
       </div>
 
-      {/* Result badge + timestamps */}
+      {/*
+       * Footer: Result badge + timestamps on the left, payout & profit as
+       * compact right-aligned group. This avoids the old full-width 3-col
+       * grid that stretched state/payout/profit across the entire card.
+       */}
       <div className="flex items-center justify-between">
-        <span
-          className={`inline-block rounded-full px-2 py-0.5 text-xs font-semibold uppercase ${resultColorClass}`}
-        >
-          {result}
-        </span>
-        <div className="text-right text-xs text-gray-400">
-          <p>Placed: {formatDate(placedAt)}</p>
-          {isSettled && settledAt && <p>Settled: {formatDate(settledAt)}</p>}
+        <div className="flex items-center gap-2">
+          <span
+            className={`inline-block rounded-full px-2 py-0.5 text-xs font-semibold uppercase ${resultColorClass}`}
+          >
+            {result}
+          </span>
+          <div className="text-xs text-gray-400">
+            <p>Placed: {formatDate(placedAt)}</p>
+            {isSettled && settledAt && <p>Settled: {formatDate(settledAt)}</p>}
+          </div>
+        </div>
+
+        {/* Payout & Profit — right-aligned compact group */}
+        <div className="flex items-center gap-3 text-sm">
+          <div className="text-right">
+            <p className="text-xs text-gray-500">Payout</p>
+            <p className="font-semibold text-gray-800">
+              {isSettled ? formatCurrency(payout) : "—"}
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-xs text-gray-500">Profit</p>
+            {profitDisplay !== null ? (
+              <p
+                className={`font-semibold ${profit !== null && profit >= 0 ? "text-green-600" : "text-red-600"}`}
+              >
+                {profitDisplay}
+              </p>
+            ) : (
+              <p className="font-semibold text-gray-400">—</p>
+            )}
+          </div>
         </div>
       </div>
     </div>

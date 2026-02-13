@@ -2,6 +2,7 @@ import { defineCatalog } from '@json-render/core'
 import { schema } from '@json-render/react'
 import { z } from 'zod'
 import { BetCardSchema } from './components/BetCard/schema'
+import { FAQSchema } from './components/FAQ/schema'
 import { StatsOverviewSchema } from './components/StatsOverview/schema'
 import { TrendLineChartSchema } from './components/TrendLineChart/schema'
 
@@ -15,6 +16,9 @@ const catalog = defineCatalog(schema, {
     },
     BetCard: {
       props: BetCardSchema,
+    },
+    FAQ: {
+      props: FAQSchema,
     },
     StatsOverview: {
       props: StatsOverviewSchema,
